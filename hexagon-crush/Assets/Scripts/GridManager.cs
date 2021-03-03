@@ -23,13 +23,15 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     private Transform _SpriteF2;//sagda 2 hex, solda 1 hex olan grup
     private Animator _myAnim;
-    [SerializeField]
-    public GameObject[,] generatedHexes = new GameObject[10,7];
-    private string _hitSpriteName;
+
+    private int _gameStatus = 1; // 1 is active, 0 is locked(not playable) 2 is object selected 
+    private GameObject[] player;    //holds selected hexes and it's sprite
+    private Vector3 _lastMouseClick; //holds last mouse click location
 
 
     void Start()
     {
+        player = new GameObject[4];
         generateMap();
     }
 
@@ -46,24 +48,33 @@ public class GridManager : MonoBehaviour
                 Debug.Log("Raycast hit something!" + hit.collider.name);
                 if(hit.collider.name.Contains("Sprite"))
                 {
-                    _hitSpriteName = hit.collider.name.Replace("Sprite", "");
+                    _lastMouseClick = Input.mousePosition;
+                    if (player[0] != null)
+                    {
+                        deActivate(player[1], player[2], player[3]);
+                    }
+                    player[0] = hit.collider.gameObject; //player'a seçilen sprite atılır
                     if (hit.collider.transform.parent.tag == "SpriteF1")
                     {
-                        RaycastHit2D midH = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition+ new Vector3(90f,0,0)), Vector2.zero);
-                        RaycastHit2D topL = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(-50f, 70f, 0)), Vector2.zero);
-                        RaycastHit2D botL = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(-50f, -70f, 0)), Vector2.zero);
-                        activateF1(midH.collider.gameObject, topL.collider.gameObject, botL.collider.gameObject);
+                        player = _getObjects(Input.mousePosition, 1, player);
+                        activateF1(player[1], player[2], player[3]);
+                        _gameStatus = 2;
                     }
                     else
                     {
-                        RaycastHit2D midH = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(-90f, 0, 0)), Vector2.zero);
-                        RaycastHit2D topR = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(+50f, 70f, 0)), Vector2.zero);
-                        RaycastHit2D botR = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(+50f, -70f, 0)), Vector2.zero);
-                        activateF2(topR.collider.gameObject, botR.collider.gameObject, midH.collider.gameObject);
+                        player = _getObjects(Input.mousePosition, 2, player);
+                        activateF2(player[1], player[2], player[3]);
+                        _gameStatus = 2;
+                        activateF2(player[1], player[2], player[3]);
                     }
                 }
                 
             }
+        }
+
+        if(_gameStatus == 2 && Input.GetKeyDown(KeyCode.Space))
+        {
+            rotateHexes(1);
         }
     }
 
@@ -97,7 +108,6 @@ public class GridManager : MonoBehaviour
                 xval += _xOffset;
                 index++;
                 hex_go.transform.SetParent(_tileMap);
-                generatedHexes[y,x] = hex_go;
                 _myAnim = hex_go.GetComponentInChildren<Animator>();
                 StartCoroutine(CoroutineWithMultipleParameters( _myAnim,(index*delay)));
                 //_myAnim.SetTrigger("Gen");
@@ -225,6 +235,72 @@ public class GridManager : MonoBehaviour
                 child.SetActive(true);
             }
         }
+    }
+
+    void deActivate(GameObject a1, GameObject a2, GameObject a3)
+    {
+        GameObject child;
+        for (int i = 0; i < a1.transform.childCount; i++)
+        {
+            child = a1.transform.GetChild(i).gameObject;
+            child.SetActive(false);
+        }
+        for (int i = 0; i < a2.transform.childCount; i++)
+        {
+            child = a2.transform.GetChild(i).gameObject;
+            child.SetActive(false);
+        }
+        for (int i = 0; i < a3.transform.childCount; i++)
+        {
+            child = a3.transform.GetChild(i).gameObject;
+            child.SetActive(false);
+        }
+
+    }
+
+    static  GameObject[] _getObjects(Vector3 mousePos, int type, GameObject[] objects) // sagda 1hex solda 2 hex için input "1", sagda 2 hex, solda 1 hex için input "2"
+    {
+        if(type == 1)
+        {
+            objects[1] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(90f, 0, 0)), Vector2.zero).transform.gameObject;
+            objects[2] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-50f, 70f, 0)), Vector2.zero).transform.gameObject;
+            objects[3] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-50f, -70f, 0)), Vector2.zero).transform.gameObject;
+            
+        }
+        else
+        {
+            objects[3] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-90f, 0, 0)), Vector2.zero).transform.gameObject;
+            objects[1] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(+50f, 70f, 0)), Vector2.zero).transform.gameObject;
+            objects[2] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(+50f, -70f, 0)), Vector2.zero).transform.gameObject;
+        }
+        return objects;
+    }
+    void rotateHexes(int direction)
+    {
+        deActivate(player[1], player[2], player[3]);
+        for (int i = 1; i < 4; i++)
+        {
+            player[i].transform.SetParent(player[0].transform);
+        }
+        if (direction==1) //rotate to right
+            player[0].transform.Rotate(0, 0, 120);
+        else //rotate to left
+            player[0].transform.Rotate(0, 0, 120*direction);
+        for (int i = 1; i < 4; i++)
+        {
+            player[i].transform.SetParent(_tileMap);
+        }
+        if (player[0].transform.name == "SpritesF1")
+        {
+            player = _getObjects(_lastMouseClick,1,player);
+            activateF1(player[1], player[2], player[3]);
+        }
+        else
+        {
+            player = _getObjects(_lastMouseClick, 2, player);
+            activateF2(player[1], player[2], player[3]);
+        }
+           
     }
 
 }

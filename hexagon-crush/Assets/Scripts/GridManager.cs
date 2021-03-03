@@ -15,8 +15,13 @@ public class GridManager : MonoBehaviour
     private GameObject[] hexs;
     [SerializeField]
     private Transform _tileMap;
+
     [SerializeField]
     private GameObject _Sprite;
+    [SerializeField]
+    private Transform _SpriteF1; //sagda 1 hex, solda 2 hex olan grup
+    [SerializeField]
+    private Transform _SpriteF2;//sagda 2 hex, solda 1 hex olan grup
     private Animator _myAnim;
     void Start()
     {
@@ -83,13 +88,15 @@ public class GridManager : MonoBehaviour
 
                         sprite_go = Instantiate(_Sprite, new Vector2(spriteXval, spriteYval), Quaternion.identity);
                         spriteXval += (4 * _spriteOffsetX);
+                        sprite_go.transform.SetParent(_SpriteF1);
                         flag++;
                     }
-                    else if (flag == 1)
+                    else
                     {
 
                         sprite_go = Instantiate(_Sprite, new Vector2(spriteXval, spriteYval), Quaternion.identity);
                         spriteXval += (2 * _spriteOffsetX);
+                        sprite_go.transform.SetParent(_SpriteF2);
                         flag = 0;
                     }
                 }
@@ -100,18 +107,21 @@ public class GridManager : MonoBehaviour
 
                         sprite_go = Instantiate(_Sprite, new Vector2(spriteXval, spriteYval), Quaternion.identity);
                         spriteXval += (2 * _spriteOffsetX);
+                        sprite_go.transform.SetParent(_SpriteF2);
                         flag++;
                     }
-                    else if (flag == 1)
+                    else
                     {
 
                         sprite_go = Instantiate(_Sprite, new Vector2(spriteXval, spriteYval), Quaternion.identity);
                         spriteXval += (4 * _spriteOffsetX);
+                        sprite_go.transform.SetParent(_SpriteF1);
                         flag = 0;
                     }
                 }
-                
-               
+                sprite_go.name = "Sprite_" + x + "_" + y;
+
+
             }
             spriteYval += _spriteOffsetY;
         }

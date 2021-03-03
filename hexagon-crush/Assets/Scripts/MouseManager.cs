@@ -15,11 +15,15 @@ public class MouseManager : MonoBehaviour
     {
         //Debug.Log("Mouse position: " + Input.mousePosition);
 
-        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
-        if (hit)
+        if(Input.GetMouseButtonDown(0))
         {
-            Debug.Log("Raycast hit something!");
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, 1<<9);
+
+            if (hit)
+            {
+                Debug.Log("Raycasts hit something!" + hit.collider.name);
+            }
         }
+        
     }
 }

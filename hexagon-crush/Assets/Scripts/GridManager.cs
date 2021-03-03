@@ -24,7 +24,10 @@ public class GridManager : MonoBehaviour
     private Transform _SpriteF2;//sagda 2 hex, solda 1 hex olan grup
     private Animator _myAnim;
     [SerializeField]
-    public GameObject[,] generatedHexes = new GameObject[7,10];
+    public GameObject[,] generatedHexes = new GameObject[10,7];
+    private string _hitSpriteName;
+
+
     void Start()
     {
         generateMap();
@@ -33,7 +36,35 @@ public class GridManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        //Debug.Log(Input.mousePosition);
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+            if (hit)
+            {
+                Debug.Log("Raycast hit something!" + hit.collider.name);
+                if(hit.collider.name.Contains("Sprite"))
+                {
+                    _hitSpriteName = hit.collider.name.Replace("Sprite", "");
+                    if (hit.collider.transform.parent.tag == "SpriteF1")
+                    {
+                        RaycastHit2D midH = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition+ new Vector3(90f,0,0)), Vector2.zero);
+                        RaycastHit2D topL = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(-50f, 70f, 0)), Vector2.zero);
+                        RaycastHit2D botL = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(-50f, -70f, 0)), Vector2.zero);
+                        activateF1(midH.collider.gameObject, topL.collider.gameObject, botL.collider.gameObject);
+                    }
+                    else
+                    {
+                        RaycastHit2D midH = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(-90f, 0, 0)), Vector2.zero);
+                        RaycastHit2D topR = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(+50f, 70f, 0)), Vector2.zero);
+                        RaycastHit2D botR = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(+50f, -70f, 0)), Vector2.zero);
+                        activateF2(topR.collider.gameObject, botR.collider.gameObject, midH.collider.gameObject);
+                    }
+                }
+                
+            }
+        }
     }
 
     void generateMap()
@@ -56,17 +87,17 @@ public class GridManager : MonoBehaviour
                 if (x % 2 == 0)
                 {
                     hex_go = Instantiate(hexs[rand], new Vector2(xval, yval), Quaternion.identity);
-                    hex_go.name = "Hex_" + x + "_" + y;
+                    hex_go.name = "Hex_" + y + "_" + x;
                 }
                 else
                 {
                     hex_go = Instantiate(hexs[rand], new Vector2(xval, (yval + _yOffset)), Quaternion.identity);
-                    hex_go.name = "Hex_" + x + "_" + ( y);
+                    hex_go.name = "Hex_" + y + "_" + ( x);
                 }
                 xval += _xOffset;
                 index++;
                 hex_go.transform.SetParent(_tileMap);
-                generatedHexes[x,y] = hex_go;
+                generatedHexes[y,x] = hex_go;
                 _myAnim = hex_go.GetComponentInChildren<Animator>();
                 StartCoroutine(CoroutineWithMultipleParameters( _myAnim,(index*delay)));
                 //_myAnim.SetTrigger("Gen");
@@ -121,7 +152,7 @@ public class GridManager : MonoBehaviour
                         flag = 0;
                     }
                 }
-                sprite_go.name = "Sprite_" + x + "_" + y;
+                sprite_go.name = "Sprite" + y + "_" + x;
 
 
             }
@@ -134,6 +165,66 @@ public class GridManager : MonoBehaviour
 
         // Insert your Play Animations here
         _myAnim.SetTrigger("Gen");
+    }
+
+    void activateF1(GameObject midRight, GameObject topLeft, GameObject botLeft)
+    {
+        GameObject child;
+ 
+        for (int i = 0; i<midRight.transform.childCount;i++)
+        {
+            if(midRight.transform.GetChild(i).name == "top" || midRight.transform.GetChild(i).name == "bot"|| midRight.transform.GetChild(i).name == "topRight"|| midRight.transform.GetChild(i).name == "botRight")
+            {
+                child = midRight.transform.GetChild(i).gameObject;
+                child.SetActive(true);
+            }  
+        }
+        for (int i = 0; i < topLeft.transform.childCount; i++)
+        {
+            if (topLeft.transform.GetChild(i).name == "topRight" || topLeft.transform.GetChild(i).name == "top" || topLeft.transform.GetChild(i).name == "topLeft" || topLeft.transform.GetChild(i).name == "botLeft")
+            {
+                child = topLeft.transform.GetChild(i).gameObject;
+                child.SetActive(true);
+            }
+        }
+        for (int i = 0; i < botLeft.transform.childCount; i++)
+        {
+            if (botLeft.transform.GetChild(i).name == "topLeft" || botLeft.transform.GetChild(i).name == "botLeft" || botLeft.transform.GetChild(i).name == "bot" || botLeft.transform.GetChild(i).name == "botRight")
+            {
+                child = botLeft.transform.GetChild(i).gameObject;
+                child.SetActive(true);
+            }
+        }
+        
+    }
+    void activateF2(GameObject topRight, GameObject botRight, GameObject midLeft)
+    {
+        GameObject child;
+
+        for (int i = 0; i < topRight.transform.childCount; i++)
+        {
+            if (topRight.transform.GetChild(i).name == "topLeft" || topRight.transform.GetChild(i).name == "top" || topRight.transform.GetChild(i).name == "topRight" || topRight.transform.GetChild(i).name == "botRight")
+            {
+                child = topRight.transform.GetChild(i).gameObject;
+                child.SetActive(true);
+            }
+        }
+        for (int i = 0; i < botRight.transform.childCount; i++)
+        {
+            if (botRight.transform.GetChild(i).name == "topRight" || botRight.transform.GetChild(i).name == "botRight" || botRight.transform.GetChild(i).name == "bot" || botRight.transform.GetChild(i).name == "botLeft")
+            {
+                child = botRight.transform.GetChild(i).gameObject;
+                child.SetActive(true);
+            }
+        }
+        for (int i = 0; i < midLeft.transform.childCount; i++)
+        {
+            if (midLeft.transform.GetChild(i).name == "top" || midLeft.transform.GetChild(i).name == "topLeft" || midLeft.transform.GetChild(i).name == "botLeft" || midLeft.transform.GetChild(i).name == "bot")
+            {
+                child = midLeft.transform.GetChild(i).gameObject;
+                child.SetActive(true);
+            }
+        }
     }
 
 }

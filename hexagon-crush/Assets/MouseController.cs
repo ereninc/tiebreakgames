@@ -7,9 +7,11 @@ public class MouseController : MonoBehaviour
     // Start is called before the first frame update
     private float _rotationSpeed = 20f;
     private Vector3 _horizontalMovement;
+
+    public LayerMask layerMask;
     void Start()
     {
-        
+        //layerMask = LayerMask.GetMask("Sprites");
     }
 
     // Update is called once per frame
@@ -22,7 +24,7 @@ public class MouseController : MonoBehaviour
 
 
 
-        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, layerMask);
 
         if (hit)
         {

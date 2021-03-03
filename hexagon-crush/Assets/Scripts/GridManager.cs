@@ -27,6 +27,7 @@ public class GridManager : MonoBehaviour
     private int _gameStatus = 1; // 1 is active, 0 is locked(not playable) 2 is object selected 
     private GameObject[] player;    //holds selected hexes and it's sprite
     private Vector3 _lastMouseClick; //holds last mouse click location
+    private Vector2[] _objectLocationsB;
 
 
     void Start()
@@ -65,17 +66,27 @@ public class GridManager : MonoBehaviour
                         player = _getObjects(Input.mousePosition, 2, player);
                         activateF2(player[1], player[2], player[3]);
                         _gameStatus = 2;
-                        activateF2(player[1], player[2], player[3]);
                     }
                 }
                 
             }
         }
-
-        if(_gameStatus == 2 && Input.GetKeyDown(KeyCode.Space))
+        if(_gameStatus==2 && Input.GetKeyDown(KeyCode.Space))
         {
-            rotateHexes(1);
+            
+            deActivate(player[1], player[2], player[3]);
+            _objectLocationsB = new Vector2[3];
+            int x = 0;
+            for (int i = 1; i < 4; i++)
+            {
+                _objectLocationsB[x++] = player[i].transform.position;
+                player[i].transform.SetParent(player[0].transform);
+            }
+            _myAnim = player[0].GetComponentInChildren<Animator>();
+            _myAnim.SetBool("sRotate120", true);
+            StartCoroutine(Coroutine()); 
         }
+
     }
 
     void generateMap()
@@ -275,24 +286,22 @@ public class GridManager : MonoBehaviour
         }
         return objects;
     }
-    void rotateHexes(int direction)
+    public IEnumerator Coroutine()
     {
-        deActivate(player[1], player[2], player[3]);
-        for (int i = 1; i < 4; i++)
-        {
-            player[i].transform.SetParent(player[0].transform);
-        }
-        if (direction==1) //rotate to right
-            player[0].transform.Rotate(0, 0, 120);
-        else //rotate to left
-            player[0].transform.Rotate(0, 0, 120*direction);
+        yield return new WaitForSeconds(1.5f);
         for (int i = 1; i < 4; i++)
         {
             player[i].transform.SetParent(_tileMap);
         }
-        if (player[0].transform.name == "SpritesF1")
+
+        
+        if (player[0].transform.parent.name == "SpriteF1")
         {
-            player = _getObjects(_lastMouseClick,1,player);
+            player[3].transform.position = _objectLocationsB[0];
+            player[1].transform.position = _objectLocationsB[1];
+            player[2].transform.position = _objectLocationsB[2];
+
+            player = _getObjects(_lastMouseClick, 1, player);
             activateF1(player[1], player[2], player[3]);
         }
         else
@@ -300,7 +309,8 @@ public class GridManager : MonoBehaviour
             player = _getObjects(_lastMouseClick, 2, player);
             activateF2(player[1], player[2], player[3]);
         }
-           
+        _myAnim.SetBool("sRotate120",false);
     }
+
 
 }

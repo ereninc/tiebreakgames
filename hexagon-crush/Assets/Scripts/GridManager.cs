@@ -23,6 +23,8 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     private Transform _SpriteF2;//sagda 2 hex, solda 1 hex olan grup
     private Animator _myAnim;
+    [SerializeField]
+    public GameObject[,] generatedHexes = new GameObject[7,10];
     void Start()
     {
         generateMap();
@@ -41,7 +43,6 @@ public class GridManager : MonoBehaviour
         float spriteXval = 0;
         float spriteYval = _spriteOffsetY;
         int rand = Random.Range(0, 4);
-        int[] rands;
         int index = 0;
         float delay = 0.02f;
         int flag = 0; //for sprite creation
@@ -55,16 +56,17 @@ public class GridManager : MonoBehaviour
                 if (x % 2 == 0)
                 {
                     hex_go = Instantiate(hexs[rand], new Vector2(xval, yval), Quaternion.identity);
-                    hex_go.name = "Hex_" + xval + "_" + yval;
+                    hex_go.name = "Hex_" + x + "_" + y;
                 }
                 else
                 {
                     hex_go = Instantiate(hexs[rand], new Vector2(xval, (yval + _yOffset)), Quaternion.identity);
-                    hex_go.name = "Hex_" + xval + "_" + (_yOffset + yval);
+                    hex_go.name = "Hex_" + x + "_" + ( y);
                 }
                 xval += _xOffset;
                 index++;
                 hex_go.transform.SetParent(_tileMap);
+                generatedHexes[x,y] = hex_go;
                 _myAnim = hex_go.GetComponentInChildren<Animator>();
                 StartCoroutine(CoroutineWithMultipleParameters( _myAnim,(index*delay)));
                 //_myAnim.SetTrigger("Gen");

@@ -427,7 +427,7 @@ public class GridManager : MonoBehaviour
         for (int j = 0; j < 3; j++)
         {
             temp[j] = Camera.main.WorldToScreenPoint(player[j + 1].transform.position);
-            Destroy(player[j + 1]);
+            //Destroy(player[j + 1]);
         }
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {
@@ -454,14 +454,7 @@ public class GridManager : MonoBehaviour
             
             
 
-            temp[0] = player[1].transform.position;  //ground of falling transfered
-
-            for (int i =0;i<fallingHexes.Count;i++) // right side hexes falled
-            {
-                temp2 = fallingHexes[i].transform.position;
-                fallingHexes[i].transform.position = temp[0];
-                temp[0] = temp2;
-            }
+            
 
             if(fallingHexes2.Count == 0)
             {
@@ -475,16 +468,7 @@ public class GridManager : MonoBehaviour
             }
             
 
-            for (int i = 0; i<2;i++) //left side hexes falled, need to be falled 2 times
-            {
-                temp[1] = player[i+2].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
-                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
-                {
-                    temp2 = fallingHexes2[j].transform.position;
-                    fallingHexes2[j].transform.position = temp[1];
-                    temp[1] = temp2;
-                }
-            }
+          
         }
         else        //hex pattern 2 which means 2 hexes on left, 1 hex on right
         {
@@ -512,13 +496,7 @@ public class GridManager : MonoBehaviour
 
 
             
-            temp[0] = player[3].transform.position;  //ground of falling transfered
-            for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
-            {
-                temp2 = fallingHexes[i].transform.position;
-                fallingHexes[i].transform.position = temp[0];
-                temp[0] = temp2;
-            }
+            
 
             if(fallingHexes2.Count == 0)
             {
@@ -533,32 +511,20 @@ public class GridManager : MonoBehaviour
             }
             
 
-            for (int i = 0; i < 2; i++) //left side hexes falled, need to be falled 2 times
-            {
-                temp[2] = player[i+1].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
-                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
-                {
-                    temp2 = fallingHexes2[j].transform.position;
-                    fallingHexes2[j].transform.position = temp[2];
-                    temp[2] = temp2;
-                }
-            }
+            
         }
 
-        fallingHexes[fallingHexes.Count - 1].transform.SetParent(_tileMap);
-        fallingHexes2[fallingHexes2.Count - 1].transform.SetParent(_tileMap);
-        fallingHexes2[fallingHexes2.Count - 2].transform.SetParent(_tileMap);
-        StartCoroutine(CoroutineWithMultipleParameters2(fallingHexes[fallingHexes.Count - 1], 0));
-        StartCoroutine(CoroutineWithMultipleParameters2(fallingHexes2[fallingHexes2.Count - 1], 0));
-        StartCoroutine(CoroutineWithMultipleParameters2(fallingHexes2[fallingHexes2.Count - 2], 0));
-        for (int j = 0; j < 3; j++)
-        {
-            Destroy(player[j + 1]);
-        }
-        _playerReset();
+        fallingHexes[fallingHexes.Count - 1].transform.SetParent(_hexFall.transform);
+        fallingHexes2[fallingHexes2.Count - 1].transform.SetParent(_hexFall.transform);
+        fallingHexes2[fallingHexes2.Count - 2].transform.SetParent(_hexFall.transform);
+
+        _hexFall.GetComponent<Animator>().SetBool("HexFall", true);
+        StartCoroutine(FallRoutine(_hexFall.GetComponent<Animator>(), temp, fallingHexes, fallingHexes2));
+        
     }
     public IEnumerator FallRoutine(Animator an, Vector3[] temp, List<GameObject> fallingHexes, List<GameObject> fallingHexes2)
     {
+        Vector3 temp2;
         RuntimeAnimatorController ac = an.runtimeAnimatorController;
         float time = 0f;
         for (int i = 0; i < ac.animationClips.Length; i++)                 //For all animations
@@ -571,12 +537,57 @@ public class GridManager : MonoBehaviour
         yield return new WaitForSeconds(time);
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {
+            temp[0] = player[1].transform.position;  //ground of falling transfered
 
+            for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
+            {
+                temp2 = fallingHexes[i].transform.position;
+                fallingHexes[i].transform.position = temp[0];
+                fallingHexes[i].transform.SetParent(_tileMap);
+                temp[0] = temp2;
+            }
+
+            for (int i = 0; i < 2; i++) //left side hexes falled, need to be falled 2 times
+            {
+                temp[1] = player[i + 2].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
+                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
+                {
+                    temp2 = fallingHexes2[j].transform.position;
+                    fallingHexes2[j].transform.position = temp[1];
+                    fallingHexes2[j].transform.SetParent(_tileMap);
+                    temp[1] = temp2;
+                }
+            }
         }
         else
         {
+            temp[0] = player[3].transform.position;  //ground of falling transfered
+            for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
+            {
+                temp2 = fallingHexes[i].transform.position;
+                fallingHexes[i].transform.position = temp[0];
+                fallingHexes[i].transform.SetParent(_tileMap);
+                temp[0] = temp2;
+            }
 
+            for (int i = 0; i < 2; i++) //left side hexes falled, need to be falled 2 times
+            {
+                temp[2] = player[i + 1].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
+                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
+                {
+                    temp2 = fallingHexes2[j].transform.position;
+                    fallingHexes2[j].transform.position = temp[2];
+                    fallingHexes2[j].transform.SetParent(_tileMap);
+                    temp[2] = temp2;
+                }
+            }
         }
+        for (int j = 0; j < 3; j++)
+        {
+            Destroy(player[j + 1]);
+        }
+        _playerReset();
+        an.SetBool("HexFall", false);
 
     }
 

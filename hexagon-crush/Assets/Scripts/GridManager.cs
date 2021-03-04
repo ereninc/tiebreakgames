@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -28,6 +29,8 @@ public class GridManager : MonoBehaviour
     private GameObject[] player;    //holds selected hexes and it's sprite
     private Vector3 _lastMouseClick; //holds last mouse click location
     private Vector2[] _objectLocationsB;
+    private float _flow = 0f;
+    private float _flow2 = 0f;
 
 
     void Start()
@@ -39,52 +42,18 @@ public class GridManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        _flow += Time.deltaTime;
+        _flow2 += Time.deltaTime;
         //Debug.Log(Input.mousePosition);
         if (Input.GetMouseButtonDown(0))
         {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-
-            if (hit)
-            {
-                Debug.Log("Raycast hit something!" + hit.collider.name);
-                if(hit.collider.name.Contains("Sprite"))
-                {
-                    _lastMouseClick = Input.mousePosition;
-                    if (player[0] != null)
-                    {
-                        deActivate(player[1], player[2], player[3]);
-                    }
-                    player[0] = hit.collider.gameObject; //player'a seçilen sprite atılır
-                    if (hit.collider.transform.parent.tag == "SpriteF1")
-                    {
-                        player = _getObjects(Input.mousePosition, 1, player);
-                        activateF1(player[1], player[2], player[3]);
-                        _gameStatus = 2;
-                    }
-                    else
-                    {
-                        player = _getObjects(Input.mousePosition, 2, player);
-                        activateF2(player[1], player[2], player[3]);
-                        _gameStatus = 2;
-                    }
-                }
-                
-            }
+            Rayc(Input.mousePosition);
         }
-        if(_gameStatus==2 && Input.GetKeyDown(KeyCode.Space))
+        if(_gameStatus==2 && Input.GetKeyDown(KeyCode.Space) && _flow2 >= 0.45f)
         {
-            
-            deActivate(player[1], player[2], player[3]);
-            _objectLocationsB = new Vector2[3];
-            int x = 0;
-            for (int i = 1; i < 4; i++)
-            {
-                _objectLocationsB[x++] = player[i].transform.position;
-                player[i].transform.SetParent(player[0].transform);
-            }
-            _myAnim = player[0].GetComponentInChildren<Animator>();
-            _myAnim.SetBool("sRotate120", true);
-            StartCoroutine(Coroutine()); 
+            _gameStatus = 0;
+            Rotate();
+
         }
 
     }
@@ -286,31 +255,82 @@ public class GridManager : MonoBehaviour
         }
         return objects;
     }
-    public IEnumerator Coroutine()
+
+    private void Rotate()
     {
-        yield return new WaitForSeconds(1.5f);
+        
+        deActivate(player[1], player[2], player[3]);
+        _objectLocationsB = new Vector2[3];
+        int x = 0;
+        for (int i = 1; i < 4; i++)
+        {
+            _objectLocationsB[x++] = player[i].transform.position;
+            player[i].transform.SetParent(player[0].transform);
+        }
+        _myAnim = player[0].GetComponentInChildren<Animator>();
+        _myAnim.SetBool("sRotate120", true);
+        StartCoroutine(MyCoroutine(_myAnim));
+    }
+
+    private void Rayc(Vector3 mouse)
+    {
+        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mouse), Vector2.zero);
+
+        if (hit)
+        {
+            Debug.Log("Raycast hit something!" + hit.collider.name);
+            if (hit.collider.name.Contains("Sprite"))
+            {
+                _lastMouseClick = mouse;
+                if (player[0] != null)
+                {
+                    deActivate(player[1], player[2], player[3]);
+                }
+                player[0] = hit.collider.gameObject; //player'a seçilen sprite atılır
+                if (hit.collider.transform.parent.tag == "SpriteF1")
+                {
+                    player = _getObjects(mouse, 1, player);
+                    activateF1(player[1], player[2], player[3]);
+                    _gameStatus = 2;
+                }
+                else
+                {
+                    player = _getObjects(Input.mousePosition, 2, player);
+                    activateF2(player[1], player[2], player[3]);
+                    _gameStatus = 2;
+                }
+            }
+
+        }
+        _flow = 0;
+    }
+
+
+    public IEnumerator MyCoroutine(Animator an)
+    {
+        RuntimeAnimatorController ac = an.runtimeAnimatorController;
+        float time=0f;
+        for (int i = 0; i < ac.animationClips.Length; i++)                 //For all animations
+        {
+            if (ac.animationClips[i].name == "SpriteRotate" || ac.animationClips[i].name == "New State")        //If it has the same name as your clip
+            {
+                time = ac.animationClips[i].length;
+            }
+        }
+        yield return new WaitForSeconds(time);
         for (int i = 1; i < 4; i++)
         {
             player[i].transform.SetParent(_tileMap);
         }
-
+        player[3].transform.position = _objectLocationsB[0];
+        player[1].transform.position = _objectLocationsB[1];
+        player[2].transform.position = _objectLocationsB[2];
         
-        if (player[0].transform.parent.name == "SpriteF1")
-        {
-            player[3].transform.position = _objectLocationsB[0];
-            player[1].transform.position = _objectLocationsB[1];
-            player[2].transform.position = _objectLocationsB[2];
-
-            player = _getObjects(_lastMouseClick, 1, player);
-            activateF1(player[1], player[2], player[3]);
-        }
-        else
-        {
-            player = _getObjects(_lastMouseClick, 2, player);
-            activateF2(player[1], player[2], player[3]);
-        }
-        _myAnim.SetBool("sRotate120",false);
+       
+        Rayc(_lastMouseClick);
+        an.SetBool("sRotate120", false);
+        _gameStatus = 2;
+        _flow2 = 0;
     }
-
 
 }

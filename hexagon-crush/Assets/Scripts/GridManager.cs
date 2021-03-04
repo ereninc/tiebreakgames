@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GridManager : MonoBehaviour
 {
@@ -23,6 +24,11 @@ public class GridManager : MonoBehaviour
     private Transform _SpriteF1; //sagda 1 hex, solda 2 hex olan grup
     [SerializeField]
     private Transform _SpriteF2;//sagda 2 hex, solda 1 hex olan grup
+
+    [SerializeField]
+    private GameObject[] _SpriteArray;
+
+
     private Animator _myAnim;
 
     private int _gameStatus = 1; // 1 is active, 0 is locked(not playable) 2 is object selected 
@@ -36,6 +42,7 @@ public class GridManager : MonoBehaviour
     void Start()
     {
         player = new GameObject[4];
+        _SpriteArray = new GameObject[108];
         generateMap();
     }
 
@@ -53,17 +60,28 @@ public class GridManager : MonoBehaviour
         {
             _gameStatus = 0;
             Rotate();
+            //blowHexes();
+        }
+        if(Input.GetKeyDown(KeyCode.W))
+        {
+            blowHexes();
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(0);
         }
 
     }
 
     void generateMap()
     {
+        
+        int spriteIndex = 0;
         float xval = 0;
         float yval = 0;
         float spriteXval = 0;
         float spriteYval = _spriteOffsetY;
-        int rand = Random.Range(0, 4);
+        int rand = 0;
         int index = 0;
         float delay = 0.02f;
         int flag = 0; //for sprite creation
@@ -72,7 +90,7 @@ public class GridManager : MonoBehaviour
             xval = 0;
             for (int x = 0; x < 7; x++)
             {
-                rand = Random.Range(0, 4);
+                rand = 0;
                 GameObject hex_go;
                 if (x % 2 == 0)
                 {
@@ -89,7 +107,6 @@ public class GridManager : MonoBehaviour
                 hex_go.transform.SetParent(_tileMap);
                 _myAnim = hex_go.GetComponentInChildren<Animator>();
                 StartCoroutine(CoroutineWithMultipleParameters( _myAnim,(index*delay)));
-                //_myAnim.SetTrigger("Gen");
             }
             yval += _yOffset*2;
         }
@@ -142,7 +159,7 @@ public class GridManager : MonoBehaviour
                     }
                 }
                 sprite_go.name = "Sprite" + y + "_" + x;
-
+                _SpriteArray[spriteIndex++] = sprite_go;
 
             }
             spriteYval += _spriteOffsetY;
@@ -268,7 +285,7 @@ public class GridManager : MonoBehaviour
         }
         _myAnim = player[0].GetComponentInChildren<Animator>();
         _myAnim.SetBool("sRotate120", true);
-        StartCoroutine(MyCoroutine(_myAnim));
+        StartCoroutine(RotateRoutine(_myAnim));
     }
 
     private void Rayc(Vector3 mouse)
@@ -277,7 +294,7 @@ public class GridManager : MonoBehaviour
 
         if (hit)
         {
-            Debug.Log("Raycast hit something!" + hit.collider.name);
+           // Debug.Log("Raycast hit something!" + hit.collider.name);
             if (hit.collider.name.Contains("Sprite"))
             {
                 _lastMouseClick = mouse;
@@ -305,7 +322,7 @@ public class GridManager : MonoBehaviour
     }
 
 
-    public IEnumerator MyCoroutine(Animator an)
+    public IEnumerator RotateRoutine(Animator an)
     {
         RuntimeAnimatorController ac = an.runtimeAnimatorController;
         float time=0f;
@@ -333,13 +350,72 @@ public class GridManager : MonoBehaviour
             player[3].transform.position = _objectLocationsB[1];
             player[1].transform.position = _objectLocationsB[2];
         }
-        
-        
-       
         Rayc(_lastMouseClick);
         an.SetBool("sRotate120", false);
-        _gameStatus = 2;
         _flow2 = 0;
+    }
+
+    private void blowHexes()
+    {
+        bool isBoom = false;
+        Vector3 screenPos;
+        for (int i = 0; i< _SpriteArray.Length;i++) //spritelar içinde dönülüyor
+        {
+            screenPos = Camera.main.WorldToScreenPoint(_SpriteArray[i].transform.position);//world location alınıyor
+            Rayc(screenPos);    //Raycast atıp player değişkeni dolduruluyor
+            if(player[0] != null)  //hata kontrolü
+            {
+                if(player[1].transform.tag == player[2].transform.tag && player[1].transform.tag == player[3].transform.tag)  //hexlerin tagleri aynı ise
+                {
+                    
+                    isBoom = true;
+                    break;
+                }
+            }
+        }
+        if (isBoom)
+        {
+            fallHexes();
+            //blowHexes();
+        }
+    }
+
+    private void fallHexes()
+    {
+        Vector3[] ground = new Vector3[3];
+        float x = 25f;
+        float y = 115f;//115 -195     275
+        Vector3[] temp = new Vector3[3];
+        RaycastHit2D hit;
+        List<GameObject> fallingHexes = new List<GameObject>();
+        for (int j = 0; j < 3; j++)
+        {
+            temp[j] = Camera.main.WorldToScreenPoint(player[j + 1].transform.position);
+            ground[j] = temp[j];
+            Destroy(player[j+1]);
+        }
+        if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
+        {
+            for(int i=0;i<10;i++)
+            {
+                hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(temp[0] + new Vector3(x, y, 0)), Vector2.zero);
+                if(hit.collider != null)
+                {
+                    fallingHexes.Add(hit.transform.gameObject);
+                    temp[0] = Camera.main.WorldToScreenPoint(hit.transform.transform.position) + new Vector3(0, y, 0);
+                }
+                    
+            }
+            foreach (var item in fallingHexes)
+            {
+                Debug.Log(item.transform.name);
+                item.SetActive(false);
+            }
+        }
+        else
+        {
+
+        }
     }
 
 }

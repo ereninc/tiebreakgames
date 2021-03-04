@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1629512774243584503}
   m_Layer: 9
   m_Name: re_Hex
-  m_TagString: Untagged
+  m_TagString: red
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -121,7 +121,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0015788972, y: 0.022104561}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -132,7 +132,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.3621245, y: 0.33633155}
+  m_Size: {x: 0.432457, y: 0.432457}
   m_EdgeRadius: 0
 --- !u!1001 &282060489901457272
 PrefabInstance:

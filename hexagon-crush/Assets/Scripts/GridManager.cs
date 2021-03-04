@@ -419,12 +419,14 @@ public class GridManager : MonoBehaviour
 
     private void fallHexes()
     {
-        Vector3 temp2;
         float y = 155f;//115 -195     275
         Vector3[] temp = new Vector3[3];
         RaycastHit2D hit;
         List<GameObject> fallingHexes = new List<GameObject>();
         List<GameObject> fallingHexes2 = new List<GameObject>();
+
+        List<Vector3> fallingHexesOldLocations = new List<Vector3>();
+        List<Vector3> fallingHexes2OldLocations = new List<Vector3>();
         for (int j = 0; j < 3; j++)
         {
             temp[j] = Camera.main.WorldToScreenPoint(player[j + 1].transform.position);
@@ -467,9 +469,10 @@ public class GridManager : MonoBehaviour
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
             }
-            
 
-          
+            fallingHexes2OldLocations.Add(player[2].transform.position);
+            fallingHexes2OldLocations.Add(player[3].transform.position);
+
         }
         else        //hex pattern 2 which means 2 hexes on left, 1 hex on right
         {
@@ -510,20 +513,34 @@ public class GridManager : MonoBehaviour
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
             }
-            
 
-            
+            fallingHexes2OldLocations.Add(player[1].transform.position);
+            fallingHexes2OldLocations.Add(player[2].transform.position);
+
         }
 
-        fallingHexes[fallingHexes.Count - 1].transform.SetParent(_hexFall.transform);
-        fallingHexes2[fallingHexes2.Count - 1].transform.SetParent(_hexFall.transform);
-        fallingHexes2[fallingHexes2.Count - 2].transform.SetParent(_hexFall.transform);
+
+        
+        for (int i = 0; i < fallingHexes.Count; i++)
+        {
+            fallingHexes[i].transform.SetParent(_hexFall.transform);
+            fallingHexesOldLocations.Add(fallingHexes[i].transform.position);
+        }
+        for(int i = 0; i<fallingHexes2.Count;i++)
+        {
+            fallingHexes2[i].transform.SetParent(_hexFall.transform);
+            fallingHexes2OldLocations.Add( fallingHexes2[i].transform.position);
+        }
 
         _hexFall.GetComponent<Animator>().SetBool("HexFall", true);
-        StartCoroutine(FallRoutine(_hexFall.GetComponent<Animator>(), temp, fallingHexes, fallingHexes2));
+        for (int j = 0; j < 3; j++)
+        {
+            player[j + 1].SetActive(false);
+        }
+        StartCoroutine(FallRoutine(_hexFall.GetComponent<Animator>(), temp, fallingHexes, fallingHexes2, fallingHexesOldLocations, fallingHexes2OldLocations));
         
     }
-    public IEnumerator FallRoutine(Animator an, Vector3[] temp, List<GameObject> fallingHexes, List<GameObject> fallingHexes2)
+    public IEnumerator FallRoutine(Animator an, Vector3[] temp, List<GameObject> fallingHexes, List<GameObject> fallingHexes2, List<Vector3> fallingHexesOldLocations, List<Vector3> fallingHexes2OldLocations)
     {
         Vector3 temp2;
         RuntimeAnimatorController ac = an.runtimeAnimatorController;
@@ -536,51 +553,53 @@ public class GridManager : MonoBehaviour
             }
         }
         Debug.Log("time: " + time);
-        yield return new WaitForSeconds(time);
+        yield return new WaitForSeconds(0.25f);
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {
             temp[0] = player[1].transform.position;  //ground of falling transfered
 
             for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
             {
-                temp2 = fallingHexes[i].transform.position;
+                temp2 = fallingHexesOldLocations[i];
                 fallingHexes[i].transform.position = temp[0];
                 fallingHexes[i].transform.SetParent(_tileMap);
                 temp[0] = temp2;
             }
 
-            for (int i = 0; i < 2; i++) //left side hexes falled, need to be falled 2 times
+
+
+            for(int i = 1;i>=0;i--)
             {
-                temp[1] = player[i + 2].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
-                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
+                for (int j = i; j < fallingHexes2.Count; j++) // right side hexes falled
                 {
-                    temp2 = fallingHexes2[j].transform.position;
+                    temp2 = fallingHexes2OldLocations[j];
                     fallingHexes2[j].transform.position = temp[1];
                     fallingHexes2[j].transform.SetParent(_tileMap);
                     temp[1] = temp2;
                 }
             }
+
+
         }
         else
         {
             temp[0] = player[3].transform.position;  //ground of falling transfered
             for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
             {
-                temp2 = fallingHexes[i].transform.position;
+                temp2 = fallingHexesOldLocations[i];
                 fallingHexes[i].transform.position = temp[0];
                 fallingHexes[i].transform.SetParent(_tileMap);
                 temp[0] = temp2;
             }
 
-            for (int i = 0; i < 2; i++) //left side hexes falled, need to be falled 2 times
+            for (int i = 1; i >= 0; i--)
             {
-                temp[2] = player[i + 1].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
-                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
+                for (int j = i; j < fallingHexes2.Count; j++) // right side hexes falled
                 {
-                    temp2 = fallingHexes2[j].transform.position;
-                    fallingHexes2[j].transform.position = temp[2];
+                    temp2 = fallingHexes2OldLocations[j];
+                    fallingHexes2[j].transform.position = temp[1];
                     fallingHexes2[j].transform.SetParent(_tileMap);
-                    temp[2] = temp2;
+                    temp[1] = temp2;
                 }
             }
         }

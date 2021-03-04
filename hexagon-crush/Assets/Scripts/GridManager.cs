@@ -90,7 +90,7 @@ public class GridManager : MonoBehaviour
             xval = 0;
             for (int x = 0; x < 7; x++)
             {
-                rand = 0;
+                rand = Random.Range(0,5);
                 GameObject hex_go;
                 if (x % 2 == 0)
                 {
@@ -382,40 +382,101 @@ public class GridManager : MonoBehaviour
 
     private void fallHexes()
     {
-        Vector3[] ground = new Vector3[3];
-        float x = 25f;
-        float y = 115f;//115 -195     275
+        Vector3 temp2;
+        float y = 155f;//115 -195     275
         Vector3[] temp = new Vector3[3];
         RaycastHit2D hit;
         List<GameObject> fallingHexes = new List<GameObject>();
+        List<GameObject> fallingHexes2 = new List<GameObject>();
         for (int j = 0; j < 3; j++)
         {
             temp[j] = Camera.main.WorldToScreenPoint(player[j + 1].transform.position);
-            ground[j] = temp[j];
-            Destroy(player[j+1]);
+            Destroy(player[j + 1]);
         }
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {
             for(int i=0;i<10;i++)
             {
-                hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(temp[0] + new Vector3(x, y, 0)), Vector2.zero);
+                hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(temp[0]+ new Vector3(0,y,0)), Vector2.zero);
                 if(hit.collider != null)
                 {
                     fallingHexes.Add(hit.transform.gameObject);
-                    temp[0] = Camera.main.WorldToScreenPoint(hit.transform.transform.position) + new Vector3(0, y, 0);
+                    //temp[0] = Camera.main.ScreenToWorldPoint(hit.transform.position);
                 }
-                    
+                hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(temp[1] + new Vector3(0, y, 0)), Vector2.zero);
+                if (hit.collider != null)
+                {
+                    fallingHexes2.Add(hit.transform.gameObject);
+                    //temp[0] = Camera.main.ScreenToWorldPoint(hit.transform.position);
+                }
+                y += 155f;   
             }
-            foreach (var item in fallingHexes)
-            {
-                Debug.Log(item.transform.name);
-                item.SetActive(false);
-            }
-        }
-        else
-        {
 
+            temp[0] = player[1].transform.position;  //ground of falling transfered
+            for(int i =0;i<fallingHexes.Count;i++) // right side hexes falled
+            {
+                temp2 = fallingHexes[i].transform.position;
+                fallingHexes[i].transform.position = temp[0];
+                temp[0] = temp2;
+            }
+
+            
+            for(int i = 0; i<2;i++) //left side hexes falled, need to be falled 2 times
+            {
+                temp[1] = player[i+2].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
+                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
+                {
+                    temp2 = fallingHexes2[j].transform.position;
+                    fallingHexes2[j].transform.position = temp[1];
+                    temp[1] = temp2;
+                }
+            }
         }
+        else        //hex pattern 2 which means 2 hexes on left, 1 hex on right
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(temp[0] + new Vector3(0, y, 0)), Vector2.zero);
+                if (hit.collider != null)
+                {
+                    fallingHexes2.Add(hit.transform.gameObject);
+                    //temp[0] = Camera.main.ScreenToWorldPoint(hit.transform.position);
+                }
+                hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(temp[2] + new Vector3(0, y, 0)), Vector2.zero);
+                if (hit.collider != null)
+                {
+                    fallingHexes.Add(hit.transform.gameObject);
+                    //temp[0] = Camera.main.ScreenToWorldPoint(hit.transform.position);
+                }
+                y += 155f;
+            }
+
+            temp[0] = player[3].transform.position;  //ground of falling transfered
+            for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
+            {
+                temp2 = fallingHexes[i].transform.position;
+                fallingHexes[i].transform.position = temp[0];
+                temp[0] = temp2;
+            }
+
+
+            for (int i = 0; i < 2; i++) //left side hexes falled, need to be falled 2 times
+            {
+                temp[2] = player[i+1].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
+                for (int j = 0; j < fallingHexes2.Count; j++) // right side hexes falled
+                {
+                    temp2 = fallingHexes2[j].transform.position;
+                    fallingHexes2[j].transform.position = temp[2];
+                    temp[2] = temp2;
+                }
+            }
+        }
+
+        for (int j = 0; j < 3; j++)
+        {
+            Destroy(player[j + 1]);
+        }
+
     }
 
 }

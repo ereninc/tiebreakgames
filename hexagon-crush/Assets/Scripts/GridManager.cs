@@ -54,6 +54,7 @@ public class GridManager : MonoBehaviour
         //Debug.Log(Input.mousePosition);
         if (Input.GetMouseButtonDown(0))
         {
+            //_playerReset();
             Rayc(Input.mousePosition,1);
         }
         if(_gameStatus==2 && Input.GetKeyDown(KeyCode.Space) && _flow2 >= 0.45f)
@@ -309,7 +310,7 @@ public class GridManager : MonoBehaviour
             if (hit.collider.name.Contains("Sprite"))
             {
                 _lastMouseClick = mouse;
-                if (type == 1)
+                if (type == 1 && player[0] !=null)
                 {
                     deActivate(player[1], player[2], player[3]);
                 }
@@ -378,6 +379,8 @@ public class GridManager : MonoBehaviour
     {
         bool isBoom = false;
         Vector3 screenPos;
+        if(player[0] != null)
+            deActivate(player[1], player[2], player[3]);
         for (int i = 0; i< _SpriteArray.Length;i++) //spritelar içinde dönülüyor
         {
             screenPos = Camera.main.WorldToScreenPoint(_SpriteArray[i].transform.position);//world location alınıyor
@@ -387,7 +390,6 @@ public class GridManager : MonoBehaviour
                 if (player[1] !=null && player[2] != null &&  player[3] != null)
                     if (player[1].transform.tag == player[2].transform.tag && player[1].transform.tag == player[3].transform.tag)  //hexlerin tagleri aynı ise
                     {
-                    
                         isBoom = true;
                         break;
                     }
@@ -497,7 +499,7 @@ public class GridManager : MonoBehaviour
         {
             Destroy(player[j + 1]);
         }
-
+        _playerReset();
     }
 
     private void _playerReset()

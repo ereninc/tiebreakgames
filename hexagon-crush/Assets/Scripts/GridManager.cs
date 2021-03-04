@@ -363,6 +363,7 @@ public class GridManager : MonoBehaviour
                 time = ac.animationClips[i].length;
             }
         }
+        Debug.Log("time: " + time);
         yield return new WaitForSeconds(time);
         for (int i = 1; i < 4; i++)
         {
@@ -529,11 +530,12 @@ public class GridManager : MonoBehaviour
         float time = 0f;
         for (int i = 0; i < ac.animationClips.Length; i++)                 //For all animations
         {
-            if (ac.animationClips[i].name == "SpriteRotate" || ac.animationClips[i].name == "New State")        //If it has the same name as your clip
+            if (ac.animationClips[i].name == "hexIdle" || ac.animationClips[i].name == "hexFall")        //If it has the same name as your clip
             {
                 time = ac.animationClips[i].length;
             }
         }
+        Debug.Log("time: " + time);
         yield return new WaitForSeconds(time);
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {

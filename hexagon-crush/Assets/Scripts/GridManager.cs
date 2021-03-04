@@ -106,8 +106,8 @@ public class GridManager : MonoBehaviour
                 xval += _xOffset;
                 index++;
                 hex_go.transform.SetParent(_tileMap);
-                _myAnim = hex_go.GetComponentInChildren<Animator>();
-                StartCoroutine(CoroutineWithMultipleParameters( _myAnim,(index*delay)));
+                
+                StartCoroutine(CoroutineWithMultipleParameters(hex_go, (index*delay)));
             }
             yval += _yOffset*2;
         }
@@ -166,12 +166,12 @@ public class GridManager : MonoBehaviour
             spriteYval += _spriteOffsetY;
         }
     }
-    public IEnumerator CoroutineWithMultipleParameters(Animator _myAnim,float delay)
+    public IEnumerator CoroutineWithMultipleParameters(GameObject obj,float delay)
     {
+        Animator ann = obj.GetComponentInChildren<Animator>(); ;
         yield return new WaitForSeconds(delay);
-
         // Insert your Play Animations here
-        _myAnim.SetTrigger("Gen");
+        ann.SetTrigger("Gen");
     }
 
     void activateF1(GameObject midRight, GameObject topLeft, GameObject botLeft)
@@ -405,8 +405,6 @@ public class GridManager : MonoBehaviour
 
     private void fallHexes()
     {
-        string nameParse;   //hex name parsing
-        int tempi;  //hex name parsing for location, uphex? or low hex for spawning new ones
         Vector3 temp2;
         float y = 155f;//115 -195     275
         Vector3[] temp = new Vector3[3];
@@ -437,8 +435,14 @@ public class GridManager : MonoBehaviour
                 y += 155f;   
             }
 
-            //new hex spawned
-            fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+            //new hex spawning
+            if (fallingHexes.Count == 0)
+                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+            else
+                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+            
+            
+
             temp[0] = player[1].transform.position;  //ground of falling transfered
             for (int i =0;i<fallingHexes.Count;i++) // right side hexes falled
             {
@@ -447,8 +451,18 @@ public class GridManager : MonoBehaviour
                 temp[0] = temp2;
             }
 
-            fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
-            fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+            if(fallingHexes2.Count == 0)
+            {
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[2].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+            }
+            else
+            {
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+            }
+            
+
             for (int i = 0; i<2;i++) //left side hexes falled, need to be falled 2 times
             {
                 temp[1] = player[i+2].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
@@ -479,8 +493,13 @@ public class GridManager : MonoBehaviour
                 y += 155f;
             }
 
+            if (fallingHexes.Count == 0)
+                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+            else
+                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
 
-            fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+
+            
             temp[0] = player[3].transform.position;  //ground of falling transfered
             for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
             {
@@ -489,8 +508,19 @@ public class GridManager : MonoBehaviour
                 temp[0] = temp2;
             }
 
-            fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
-            fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+            if(fallingHexes2.Count == 0)
+            {
+                
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+            }
+            else
+            {
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+            }
+            
+
             for (int i = 0; i < 2; i++) //left side hexes falled, need to be falled 2 times
             {
                 temp[2] = player[i+1].transform.position; //ground of falling transfered, need to do it 2 times because there is 2 hexes which is destroyed
@@ -503,6 +533,12 @@ public class GridManager : MonoBehaviour
             }
         }
 
+        fallingHexes[fallingHexes.Count - 1].transform.SetParent(_tileMap);
+        fallingHexes2[fallingHexes2.Count - 1].transform.SetParent(_tileMap);
+        fallingHexes2[fallingHexes2.Count - 2].transform.SetParent(_tileMap);
+        StartCoroutine(CoroutineWithMultipleParameters(fallingHexes[fallingHexes.Count - 1], 0));
+        StartCoroutine(CoroutineWithMultipleParameters(fallingHexes2[fallingHexes2.Count - 1], 0));
+        StartCoroutine(CoroutineWithMultipleParameters(fallingHexes2[fallingHexes2.Count - 2], 0));
         for (int j = 0; j < 3; j++)
         {
             Destroy(player[j + 1]);
@@ -515,5 +551,7 @@ public class GridManager : MonoBehaviour
         for (int i = 0; i < 4; i++)
             player[i] = null;
     }
+
+    
 
 }

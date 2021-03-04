@@ -53,7 +53,6 @@ public class GridManager : MonoBehaviour
         {
             _gameStatus = 0;
             Rotate();
-
         }
 
     }

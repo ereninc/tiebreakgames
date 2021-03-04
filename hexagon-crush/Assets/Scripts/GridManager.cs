@@ -295,7 +295,7 @@ public class GridManager : MonoBehaviour
                 }
                 else
                 {
-                    player = _getObjects(Input.mousePosition, 2, player);
+                    player = _getObjects(mouse, 2, player);
                     activateF2(player[1], player[2], player[3]);
                     _gameStatus = 2;
                 }
@@ -322,9 +322,19 @@ public class GridManager : MonoBehaviour
         {
             player[i].transform.SetParent(_tileMap);
         }
-        player[3].transform.position = _objectLocationsB[0];
-        player[1].transform.position = _objectLocationsB[1];
-        player[2].transform.position = _objectLocationsB[2];
+        if(player[0].transform.parent.name == "SpriteF1")
+        {
+            player[3].transform.position = _objectLocationsB[0];
+            player[1].transform.position = _objectLocationsB[1];
+            player[2].transform.position = _objectLocationsB[2];
+        }
+        else
+        {
+            player[2].transform.position = _objectLocationsB[0];
+            player[3].transform.position = _objectLocationsB[1];
+            player[1].transform.position = _objectLocationsB[2];
+        }
+        
         
        
         Rayc(_lastMouseClick);

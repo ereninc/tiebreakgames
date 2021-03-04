@@ -28,6 +28,9 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     private GameObject[] _SpriteArray;
 
+    [SerializeField]
+    private GameObject _hexFall;
+
 
     private Animator _myAnim;
 
@@ -166,12 +169,19 @@ public class GridManager : MonoBehaviour
             spriteYval += _spriteOffsetY;
         }
     }
-    public IEnumerator CoroutineWithMultipleParameters(GameObject obj,float delay)
+    public IEnumerator CoroutineWithMultipleParameters(GameObject obj,float delay) //start animation
     {
         Animator ann = obj.GetComponentInChildren<Animator>(); ;
         yield return new WaitForSeconds(delay);
         // Insert your Play Animations here
         ann.SetTrigger("Gen");
+    }
+    public IEnumerator CoroutineWithMultipleParameters2(GameObject obj, float delay) //drop animation
+    {
+        Animator ann = obj.GetComponentInChildren<Animator>(); ;
+        yield return new WaitForSeconds(delay);
+        // Insert your Play Animations here
+        ann.SetTrigger("Fall");
     }
 
     void activateF1(GameObject midRight, GameObject topLeft, GameObject botLeft)
@@ -374,7 +384,10 @@ public class GridManager : MonoBehaviour
         an.SetBool("sRotate120", false);
         _flow2 = 0;
     }
-    
+
+  
+
+
     private void blowHexes()
     {
         bool isBoom = false;
@@ -424,13 +437,11 @@ public class GridManager : MonoBehaviour
                 if(hit.collider != null)
                 {
                     fallingHexes.Add(hit.transform.gameObject);
-                    //temp[0] = Camera.main.ScreenToWorldPoint(hit.transform.position);
                 }
                 hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(temp[1] + new Vector3(0, y, 0)), Vector2.zero);
                 if (hit.collider != null)
                 {
                     fallingHexes2.Add(hit.transform.gameObject);
-                    //temp[0] = Camera.main.ScreenToWorldPoint(hit.transform.position);
                 }
                 y += 155f;   
             }
@@ -444,6 +455,7 @@ public class GridManager : MonoBehaviour
             
 
             temp[0] = player[1].transform.position;  //ground of falling transfered
+
             for (int i =0;i<fallingHexes.Count;i++) // right side hexes falled
             {
                 temp2 = fallingHexes[i].transform.position;
@@ -536,14 +548,36 @@ public class GridManager : MonoBehaviour
         fallingHexes[fallingHexes.Count - 1].transform.SetParent(_tileMap);
         fallingHexes2[fallingHexes2.Count - 1].transform.SetParent(_tileMap);
         fallingHexes2[fallingHexes2.Count - 2].transform.SetParent(_tileMap);
-        StartCoroutine(CoroutineWithMultipleParameters(fallingHexes[fallingHexes.Count - 1], 0));
-        StartCoroutine(CoroutineWithMultipleParameters(fallingHexes2[fallingHexes2.Count - 1], 0));
-        StartCoroutine(CoroutineWithMultipleParameters(fallingHexes2[fallingHexes2.Count - 2], 0));
+        StartCoroutine(CoroutineWithMultipleParameters2(fallingHexes[fallingHexes.Count - 1], 0));
+        StartCoroutine(CoroutineWithMultipleParameters2(fallingHexes2[fallingHexes2.Count - 1], 0));
+        StartCoroutine(CoroutineWithMultipleParameters2(fallingHexes2[fallingHexes2.Count - 2], 0));
         for (int j = 0; j < 3; j++)
         {
             Destroy(player[j + 1]);
         }
         _playerReset();
+    }
+    public IEnumerator FallRoutine(Animator an, Vector3[] temp, List<GameObject> fallingHexes, List<GameObject> fallingHexes2)
+    {
+        RuntimeAnimatorController ac = an.runtimeAnimatorController;
+        float time = 0f;
+        for (int i = 0; i < ac.animationClips.Length; i++)                 //For all animations
+        {
+            if (ac.animationClips[i].name == "SpriteRotate" || ac.animationClips[i].name == "New State")        //If it has the same name as your clip
+            {
+                time = ac.animationClips[i].length;
+            }
+        }
+        yield return new WaitForSeconds(time);
+        if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
+        {
+
+        }
+        else
+        {
+
+        }
+
     }
 
     private void _playerReset()

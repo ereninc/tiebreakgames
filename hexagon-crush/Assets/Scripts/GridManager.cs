@@ -54,7 +54,7 @@ public class GridManager : MonoBehaviour
         //Debug.Log(Input.mousePosition);
         if (Input.GetMouseButtonDown(0))
         {
-            Rayc(Input.mousePosition);
+            Rayc(Input.mousePosition,1);
         }
         if(_gameStatus==2 && Input.GetKeyDown(KeyCode.Space) && _flow2 >= 0.45f)
         {
@@ -256,18 +256,29 @@ public class GridManager : MonoBehaviour
 
     static  GameObject[] _getObjects(Vector3 mousePos, int type, GameObject[] objects) // sagda 1hex solda 2 hex için input "1", sagda 2 hex, solda 1 hex için input "2"
     {
+        RaycastHit2D hit;
         if(type == 1)
         {
-            objects[1] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(90f, 0, 0)), Vector2.zero).transform.gameObject;
-            objects[2] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-50f, 70f, 0)), Vector2.zero).transform.gameObject;
-            objects[3] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-50f, -70f, 0)), Vector2.zero).transform.gameObject;
-            
+            hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(90f, 0, 0)), Vector2.zero);
+            if(hit.collider != null) { objects[1] = hit.collider.transform.gameObject; }
+
+            hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-50f, 70f, 0)), Vector2.zero);
+            if(hit.collider != null) { objects[2] = hit.collider.transform.gameObject; }
+
+            hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-50f, -70f, 0)), Vector2.zero);
+            if (hit.collider != null) { objects[3] = hit.collider.transform.gameObject; }
+
         }
         else
         {
-            objects[3] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-90f, 0, 0)), Vector2.zero).transform.gameObject;
-            objects[1] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(+50f, 70f, 0)), Vector2.zero).transform.gameObject;
-            objects[2] = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(+50f, -70f, 0)), Vector2.zero).transform.gameObject;
+            hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(-90f, 0, 0)), Vector2.zero);
+            if (hit.collider != null) { objects[3] = hit.collider.transform.gameObject; }
+
+            hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(+50f, 70f, 0)), Vector2.zero);
+            if (hit.collider != null) { objects[1] = hit.collider.transform.gameObject; }
+
+            hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePos + new Vector3(+50f, -70f, 0)), Vector2.zero);
+            if (hit.collider != null) { objects[2] = hit.collider.transform.gameObject; }
         }
         return objects;
     }
@@ -288,7 +299,7 @@ public class GridManager : MonoBehaviour
         StartCoroutine(RotateRoutine(_myAnim));
     }
 
-    private void Rayc(Vector3 mouse)
+    private void Rayc(Vector3 mouse , int type) // 1 for acting like player click, 2 for using in code without activating hex edges
     {
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mouse), Vector2.zero);
 
@@ -298,7 +309,7 @@ public class GridManager : MonoBehaviour
             if (hit.collider.name.Contains("Sprite"))
             {
                 _lastMouseClick = mouse;
-                if (player[0] != null)
+                if (type == 1)
                 {
                     deActivate(player[1], player[2], player[3]);
                 }
@@ -306,14 +317,22 @@ public class GridManager : MonoBehaviour
                 if (hit.collider.transform.parent.tag == "SpriteF1")
                 {
                     player = _getObjects(mouse, 1, player);
-                    activateF1(player[1], player[2], player[3]);
-                    _gameStatus = 2;
+                    if(type == 1)
+                    {
+                        activateF1(player[1], player[2], player[3]);
+                        _gameStatus = 2;
+                    }
+                    
                 }
                 else
                 {
                     player = _getObjects(mouse, 2, player);
-                    activateF2(player[1], player[2], player[3]);
-                    _gameStatus = 2;
+                    if( type == 1)
+                    {
+                        activateF2(player[1], player[2], player[3]);
+                        _gameStatus = 2;
+                    }
+                    
                 }
             }
 
@@ -350,11 +369,11 @@ public class GridManager : MonoBehaviour
             player[3].transform.position = _objectLocationsB[1];
             player[1].transform.position = _objectLocationsB[2];
         }
-        Rayc(_lastMouseClick);
+        Rayc(_lastMouseClick,1);
         an.SetBool("sRotate120", false);
         _flow2 = 0;
     }
-
+    
     private void blowHexes()
     {
         bool isBoom = false;
@@ -362,16 +381,18 @@ public class GridManager : MonoBehaviour
         for (int i = 0; i< _SpriteArray.Length;i++) //spritelar içinde dönülüyor
         {
             screenPos = Camera.main.WorldToScreenPoint(_SpriteArray[i].transform.position);//world location alınıyor
-            Rayc(screenPos);    //Raycast atıp player değişkeni dolduruluyor
+            Rayc(screenPos,2);    //Raycast atıp player değişkeni dolduruluyor
             if(player[0] != null)  //hata kontrolü
             {
-                if(player[1].transform.tag == player[2].transform.tag && player[1].transform.tag == player[3].transform.tag)  //hexlerin tagleri aynı ise
-                {
+                if (player[1] !=null && player[2] != null &&  player[3] != null)
+                    if (player[1].transform.tag == player[2].transform.tag && player[1].transform.tag == player[3].transform.tag)  //hexlerin tagleri aynı ise
+                    {
                     
-                    isBoom = true;
-                    break;
-                }
+                        isBoom = true;
+                        break;
+                    }
             }
+            _playerReset();
         }
         if (isBoom)
         {
@@ -477,6 +498,12 @@ public class GridManager : MonoBehaviour
             Destroy(player[j + 1]);
         }
 
+    }
+
+    private void _playerReset()
+    {
+        for (int i = 0; i < 4; i++)
+            player[i] = null;
     }
 
 }

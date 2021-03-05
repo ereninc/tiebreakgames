@@ -34,12 +34,15 @@ public class GridManager : MonoBehaviour
 
     private Animator _myAnim;
 
-    private int _gameStatus = 1; // 1 is active, 0 is locked(not playable) 2 is object selected 
+    private int _gameStatus = 3; // 1 is active, 0 is locked(not playable) 2 is object selected, 3 is screen loading
     private GameObject[] player;    //holds selected hexes and it's sprite
     private Vector3 _lastMouseClick; //holds last mouse click location
     private Vector2[] _objectLocationsB;
     private float _flow = 0f;
     private float _flow2 = 0f;
+    private float _flow3 = 0f;
+
+    private bool isBoom = false;
 
 
     void Start()
@@ -52,29 +55,39 @@ public class GridManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        _flow += Time.deltaTime;
-        _flow2 += Time.deltaTime;
-        //Debug.Log(Input.mousePosition);
-        if (Input.GetMouseButtonDown(0))
+        if(_gameStatus != 3)
         {
-            //_playerReset();
-            Rayc(Input.mousePosition,1);
+            _flow += Time.deltaTime;
+            _flow2 += Time.deltaTime;
+            _flow3 += Time.deltaTime;
+            //Debug.Log(Input.mousePosition);
+            if (Input.GetMouseButtonDown(0))
+            {
+                //_playerReset();
+                Rayc(Input.mousePosition, 1);
+                _lastMouseClick = Input.mousePosition;
+                _gameStatus = 2;
+            }
+            if (_gameStatus == 2 && Input.GetKeyDown(KeyCode.Space) && _flow2 >= 0.45f)
+            {
+                _gameStatus = 0;
+                Rotate();
+            }
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                blowHexes();
+            }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                SceneManager.LoadScene(0);
+            }
+            if (!isBoom && _gameStatus == 1)
+            {
+                blowHexes();
+            }
+                
         }
-        if(_gameStatus==2 && Input.GetKeyDown(KeyCode.Space) && _flow2 >= 0.45f)
-        {
-            _gameStatus = 0;
-            Rotate();
-            //blowHexes();
-        }
-        if(Input.GetKeyDown(KeyCode.W))
-        {
-            blowHexes();
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            SceneManager.LoadScene(0);
-        }
-
+        
     }
 
     void generateMap()
@@ -110,7 +123,7 @@ public class GridManager : MonoBehaviour
                 index++;
                 hex_go.transform.SetParent(_tileMap);
                 
-                StartCoroutine(CoroutineWithMultipleParameters(hex_go, (index*delay)));
+                StartCoroutine(CoroutineWithMultipleParameters(hex_go, (index*delay),index));
             }
             yval += _yOffset*2;
         }
@@ -169,12 +182,14 @@ public class GridManager : MonoBehaviour
             spriteYval += _spriteOffsetY;
         }
     }
-    public IEnumerator CoroutineWithMultipleParameters(GameObject obj,float delay) //start animation
+    public IEnumerator CoroutineWithMultipleParameters(GameObject obj,float delay, int id) //start animation
     {
         Animator ann = obj.GetComponentInChildren<Animator>(); ;
         yield return new WaitForSeconds(delay);
         // Insert your Play Animations here
         ann.SetTrigger("Gen");
+        if (id == 54)
+            _gameStatus = 1;
     }
     public IEnumerator CoroutineWithMultipleParameters2(GameObject obj, float delay) //drop animation
     {
@@ -319,8 +334,8 @@ public class GridManager : MonoBehaviour
            // Debug.Log("Raycast hit something!" + hit.collider.name);
             if (hit.collider.name.Contains("Sprite"))
             {
-                _lastMouseClick = mouse;
-                if (type == 1 && player[0] !=null)
+                //_lastMouseClick = mouse;
+                if (type == 1 && player[0] !=null && player[1] != null && player[2] != null && player[3] != null)
                 {
                     deActivate(player[1], player[2], player[3]);
                 }
@@ -381,9 +396,11 @@ public class GridManager : MonoBehaviour
             player[3].transform.position = _objectLocationsB[1];
             player[1].transform.position = _objectLocationsB[2];
         }
-        Rayc(_lastMouseClick,1);
+        
         an.SetBool("sRotate120", false);
         _flow2 = 0;
+        blowHexes();
+            
     }
 
   
@@ -391,7 +408,6 @@ public class GridManager : MonoBehaviour
 
     private void blowHexes()
     {
-        bool isBoom = false;
         Vector3 screenPos;
         if(player[0] != null)
             deActivate(player[1], player[2], player[3]);
@@ -401,7 +417,7 @@ public class GridManager : MonoBehaviour
             Rayc(screenPos,2);    //Raycast atıp player değişkeni dolduruluyor
             if(player[0] != null)  //hata kontrolü
             {
-                if (player[1] !=null && player[2] != null &&  player[3] != null)
+                if (player[1] != null && player[2] != null && player[3] != null)
                     if (player[1].transform.tag == player[2].transform.tag && player[1].transform.tag == player[3].transform.tag)  //hexlerin tagleri aynı ise
                     {
                         isBoom = true;
@@ -413,8 +429,13 @@ public class GridManager : MonoBehaviour
         if (isBoom)
         {
             fallHexes();
-            //blowHexes();
         }
+        else
+        {
+            Rayc(_lastMouseClick, 1);
+            _gameStatus = 2;
+        }
+
     }
 
     private void fallHexes()
@@ -609,6 +630,9 @@ public class GridManager : MonoBehaviour
         }
         _playerReset();
         an.SetBool("HexFall", false);
+        isBoom = false;
+        _gameStatus = 1;
+        blowHexes();
 
     }
 

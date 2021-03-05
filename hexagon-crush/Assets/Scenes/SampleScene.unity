@@ -185,7 +185,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &127341977
 GameObject:
@@ -222,6 +222,11 @@ MonoBehaviour:
   - {fileID: 9081090328650240044, guid: 563f0721dd5008f44a946a8dd33a1ad2, type: 3}
   - {fileID: 831684915869650750, guid: db926c22d1efd934aa38410f7d4c0f2e, type: 3}
   - {fileID: 2151731201980745735, guid: b4de8a69066b1284c8ad02f3502bd41c, type: 3}
+  - {fileID: 8893558479660797163, guid: c7073367660f80d4ab19b584697b5298, type: 3}
+  - {fileID: 8893558479660797163, guid: 8c0db3424efd0b6439193d21a32ca247, type: 3}
+  - {fileID: 8893558479660797163, guid: d5c9be4c7cfb7c74690a15119732d7fa, type: 3}
+  - {fileID: 8893558479660797163, guid: 8ee391db3ef4942439d5e510e930630f, type: 3}
+  - {fileID: 8893558479660797163, guid: 994252cd4ee7ed740b5921bdc4d4075e, type: 3}
   _tileMap: {fileID: 1948895714}
   _Sprite: {fileID: 4975439660998190006, guid: 482766ada2b269b409376ff4b3e58970, type: 3}
   _SpriteF1: {fileID: 1659812660}
@@ -477,7 +482,7 @@ RectTransform:
   - {fileID: 1139166438}
   - {fileID: 1954376873}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1355,77 +1360,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &6891402309593288894
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 2.08
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 4.22
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: -90
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2854616037528193217, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7631114201296339379, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: playOnAwake
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8417039457660106406, guid: 85cff7a45d766c84d902d9a17ade83bb,
-        type: 3}
-      propertyPath: m_Name
-      value: ExplodeFX
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 85cff7a45d766c84d902d9a17ade83bb, type: 3}

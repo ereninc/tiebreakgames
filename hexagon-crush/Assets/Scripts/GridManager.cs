@@ -35,7 +35,7 @@ public class GridManager : MonoBehaviour
 
     private Animator _myAnim;
 
-    private int _gameStatus = 3; // 1 is active, 0 is locked(not playable) 2 is object selected, 3 is screen loading
+    public int _gameStatus = 3; // 1 is active, 0 is locked(not playable) 2 is object selected, 3 is screen loading
     private GameObject[] player;    //holds selected hexes and it's sprite
     private Vector3 _lastMouseClick; //holds last mouse click location
     private Vector2[] _objectLocationsB;
@@ -49,7 +49,7 @@ public class GridManager : MonoBehaviour
     public static GridManager instance;
     [SerializeField] Text _scoreText;
     [SerializeField] GameObject _panel;
-
+    private int _scoreBomb = 0;
 
     void Start()
     {
@@ -62,13 +62,22 @@ public class GridManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(_gameStatus != 3)
+        if (_gameStatus == 9)
+        {
+            if (player[0] != null)
+            {
+                deActivate(player[1], player[2], player[3]);
+                _playerReset();
+            }
+            Debug.Log("Game over");
+        }
+        if(_gameStatus != 3 && _gameStatus != 9)
         {
             _flow += Time.deltaTime;
             _flow2 += Time.deltaTime;
             _flow3 += Time.deltaTime;
             //Debug.Log(Input.mousePosition);
-            if (Input.GetMouseButtonDown(0) && _flow>=0.45f)
+            if (Input.GetMouseButtonDown(0) && _flow>=0.45f && _gameStatus == 2)
             {
                 //_playerReset();
                 Rayc(Input.mousePosition, 1);
@@ -89,15 +98,9 @@ public class GridManager : MonoBehaviour
             {
                 _panel.GetComponentInChildren<Animator>().SetTrigger("panelDeactive");
                 panelActive = false;
-                Debug.Log(panelActive);
                 _score = 0;
                 _scoreText.text = _score.ToString();
             }
-                
-
-
-
-
             if (Input.GetKeyDown(KeyCode.W))
             {
                 blowHexes();
@@ -107,7 +110,6 @@ public class GridManager : MonoBehaviour
                 SceneManager.LoadScene(0);
             }
         }
-        
     }
 
     void generateMap()
@@ -335,7 +337,6 @@ public class GridManager : MonoBehaviour
 
         if (hit)
         {
-           // Debug.Log("Raycast hit something!" + hit.collider.name);
             if (hit.collider.name.Contains("Sprite"))
             {
                 //_lastMouseClick = mouse;
@@ -373,6 +374,7 @@ public class GridManager : MonoBehaviour
 
     public IEnumerator RotateRoutine(Animator an)
     {
+        
         RuntimeAnimatorController ac = an.runtimeAnimatorController;
         float time=0f;
         for (int i = 0; i < ac.animationClips.Length; i++)                 //For all animations
@@ -382,28 +384,30 @@ public class GridManager : MonoBehaviour
                 time = ac.animationClips[i].length;
             }
         }
-        Debug.Log("time: " + time);
         yield return new WaitForSeconds(time);
-        for (int i = 1; i < 4; i++)
+        if (player[0] != null)
         {
-            player[i].transform.SetParent(_tileMap);
+            for (int i = 1; i < 4; i++)
+            {
+                player[i].transform.SetParent(_tileMap);
+            }
+            if (player[0].transform.parent.name == "SpriteF1")
+            {
+                player[3].transform.position = _objectLocationsB[0];
+                player[1].transform.position = _objectLocationsB[1];
+                player[2].transform.position = _objectLocationsB[2];
+            }
+            else
+            {
+                player[2].transform.position = _objectLocationsB[0];
+                player[3].transform.position = _objectLocationsB[1];
+                player[1].transform.position = _objectLocationsB[2];
+            }
+
+            an.SetBool("sRotate120", false);
+            _flow2 = 0;
+            blowHexes();
         }
-        if(player[0].transform.parent.name == "SpriteF1")
-        {
-            player[3].transform.position = _objectLocationsB[0];
-            player[1].transform.position = _objectLocationsB[1];
-            player[2].transform.position = _objectLocationsB[2];
-        }
-        else
-        {
-            player[2].transform.position = _objectLocationsB[0];
-            player[3].transform.position = _objectLocationsB[1];
-            player[1].transform.position = _objectLocationsB[2];
-        }
-        
-        an.SetBool("sRotate120", false);
-        _flow2 = 0;
-        blowHexes();
             
     }
 
@@ -427,6 +431,10 @@ public class GridManager : MonoBehaviour
                         GameObject expFX = Instantiate(_explodeFX, player[0].transform.position, Quaternion.identity);
                         Destroy(expFX, 2f);
                         _score += 30;
+                        if (panelActive == false)
+                        {
+                            _scoreBomb += 30;
+                        }
                         _scoreText.text = _score.ToString();
                         isBoom = true;
                         break;
@@ -448,6 +456,12 @@ public class GridManager : MonoBehaviour
 
     private void fallHexes()
     {
+        int bomb = 9;
+        if (_scoreBomb >= 120)
+        {
+            bomb = Random.Range(0, 1);
+            _scoreBomb = 0;
+        }
         float y = 155f;//115 -195     275
         Vector3[] temp = new Vector3[3];
         RaycastHit2D hit;
@@ -480,23 +494,32 @@ public class GridManager : MonoBehaviour
 
             //new hex spawning
             if (fallingHexes.Count == 0)
-                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                if (bomb == 0)  //if de bomba-else de hex spawn.
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                else
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
             else
-                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
-            
-            
+                if (bomb == 0)
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                else
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
 
-            
-
-            if(fallingHexes2.Count == 0)
+            if (fallingHexes2.Count == 0)
             {
+                if (bomb == 1)
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                else
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[2].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
             }
             else
             {
+                if (bomb == 1)
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                else
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                
             }
 
             fallingHexes2OldLocations.Add(player[2].transform.position);
@@ -523,24 +546,34 @@ public class GridManager : MonoBehaviour
             }
 
             if (fallingHexes.Count == 0)
-                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                if(bomb == 0)
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                else
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
             else
-                fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                if(bomb == 0)
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                else
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
 
 
-            
-            
 
-            if(fallingHexes2.Count == 0)
+
+            if (fallingHexes2.Count == 0)
             {
-                
+                if(bomb == 1)
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                else
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
             }
             else
             {
+                if(bomb == 1)
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                else
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
             }
 
             fallingHexes2OldLocations.Add(player[1].transform.position);
@@ -581,7 +614,6 @@ public class GridManager : MonoBehaviour
                 time = ac.animationClips[i].length;
             }
         }
-        Debug.Log("time: " + time);
         yield return new WaitForSeconds(0.25f);
         
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol

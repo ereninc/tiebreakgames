@@ -81,7 +81,7 @@ public class GridManager : MonoBehaviour
             {
                 SceneManager.LoadScene(0);
             }
-            if (!isBoom && _gameStatus == 1)
+            if (!isBoom && _gameStatus == 1 && _flow3>=0.45f)
             {
                 blowHexes();
             }
@@ -632,7 +632,7 @@ public class GridManager : MonoBehaviour
         an.SetBool("HexFall", false);
         isBoom = false;
         _gameStatus = 1;
-        blowHexes();
+        _flow3 =0;
 
     }
 

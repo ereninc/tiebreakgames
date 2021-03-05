@@ -44,6 +44,8 @@ public class GridManager : MonoBehaviour
 
     private bool isBoom = false;
 
+    [SerializeField] private GameObject explodeFX;
+
 
     void Start()
     {
@@ -421,6 +423,8 @@ public class GridManager : MonoBehaviour
                     if (player[1].transform.tag == player[2].transform.tag && player[1].transform.tag == player[3].transform.tag)  //hexlerin tagleri aynı ise
                     {
                         isBoom = true;
+                        GameObject expFX = Instantiate(explodeFX, player[0].transform.position, Quaternion.identity);
+                        Destroy(expFX, 2.5f);
                         break;
                     }
             }
@@ -451,7 +455,8 @@ public class GridManager : MonoBehaviour
         for (int j = 0; j < 3; j++)
         {
             temp[j] = Camera.main.WorldToScreenPoint(player[j + 1].transform.position);
-            //Destroy(player[j + 1]);
+            player[j + 1].SetActive(false);
+
         }
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {

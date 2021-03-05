@@ -36,11 +36,11 @@ public class GridManager : MonoBehaviour
     private Animator _myAnim;
 
     public int _gameStatus = 3; // 1 is active, 0 is locked(not playable) 2 is object selected, 3 is screen loading
-    private GameObject[] player;    //holds selected hexes and it's sprite
+    public GameObject[] player;    //holds selected hexes and it's sprite
     private Vector3 _lastMouseClick; //holds last mouse click location
     private Vector2[] _objectLocationsB;
     private float _flow = 0f;
-    private float _flow2 = 0f;
+    public float _flow2 = 0f;
     private float _flow3 = 0f;
     [SerializeField] private GameObject _explodeFX;
     private bool isBoom = false;
@@ -50,6 +50,9 @@ public class GridManager : MonoBehaviour
     [SerializeField] Text _scoreText;
     [SerializeField] GameObject _panel;
     private int _scoreBomb = 0;
+
+    private Touch _touch;
+    private Vector2 _touchPosStart, _touchPosEnd;
 
     void Start()
     {
@@ -76,20 +79,8 @@ public class GridManager : MonoBehaviour
             _flow += Time.deltaTime;
             _flow2 += Time.deltaTime;
             _flow3 += Time.deltaTime;
-            //Debug.Log(Input.mousePosition);
-            if (Input.GetMouseButtonDown(0) && _flow>=0.45f && _gameStatus == 2)
-            {
-                //_playerReset();
-                Rayc(Input.mousePosition, 1);
-                _lastMouseClick = Input.mousePosition;
-                _gameStatus = 2;
-            }
-            if (_gameStatus == 2 && Input.GetKeyDown(KeyCode.Space) && _flow2 >= 0.45f)
-            {
-                _gameStatus = 0;
-                Rotate();
-            }
-            
+            TouchInput();
+
             if (!isBoom && _gameStatus == 1 && _flow3>=0.8f)
             {
                 blowHexes();
@@ -101,16 +92,50 @@ public class GridManager : MonoBehaviour
                 _score = 0;
                 _scoreText.text = _score.ToString();
             }
-            if (Input.GetKeyDown(KeyCode.W))
+        }
+    }
+
+
+    private void TouchInput()
+    {
+        if (Input.touchCount > 0)
+        {
+            _touch = Input.GetTouch(0);
+            if (_touch.phase == TouchPhase.Began)
             {
-                blowHexes();
+                _touchPosStart = _touch.position;
             }
-            if (Input.GetKeyDown(KeyCode.R))
+            else if (_touch.phase == TouchPhase.Moved || _touch.phase == TouchPhase.Ended)
             {
-                SceneManager.LoadScene(0);
+                _touchPosEnd = _touch.position;
+                float x = _touchPosEnd.x - _touchPosStart.x;
+                float y = _touchPosEnd.y - _touchPosStart.y;
+
+                if (Mathf.Abs(x) == 0 && Mathf.Abs(y) == 0 && _flow >= 0.45f && _gameStatus == 2) //TAPPED! (select hexagons)
+                {
+                    Rayc(Input.mousePosition, 1);
+                    _lastMouseClick = Input.mousePosition;
+                    _gameStatus = 2;
+                }
+                //TURN SELECTED OBJECTS
+                else if (Mathf.Abs(x) > Mathf.Abs(y) && _gameStatus == 2 && _flow2 >= 0.45f && player[0] != null)
+                {
+                    //GetNeighboors and turn clockwise or counter-clockwise.
+                    if (x > 0)
+                    {
+                        _gameStatus = 0;
+                        Rotate();
+                    }
+                    else
+                    {
+                        _gameStatus = 0;
+                        Rotate();
+                    }
+                }
             }
         }
     }
+
 
     void generateMap()
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GridManager : MonoBehaviour
 {
@@ -41,16 +42,20 @@ public class GridManager : MonoBehaviour
     private float _flow = 0f;
     private float _flow2 = 0f;
     private float _flow3 = 0f;
-
+    [SerializeField] private GameObject _explodeFX;
     private bool isBoom = false;
-
-    [SerializeField] private GameObject explodeFX;
+    private int _score = 0;
+    public bool panelActive = true; //game starting panel
+    public static GridManager instance;
+    [SerializeField] Text _scoreText;
+    [SerializeField] GameObject _panel;
 
 
     void Start()
     {
         player = new GameObject[4];
         _SpriteArray = new GameObject[108];
+        instance = this;
         generateMap();
     }
 
@@ -63,7 +68,7 @@ public class GridManager : MonoBehaviour
             _flow2 += Time.deltaTime;
             _flow3 += Time.deltaTime;
             //Debug.Log(Input.mousePosition);
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && _flow>=0.45f)
             {
                 //_playerReset();
                 Rayc(Input.mousePosition, 1);
@@ -75,6 +80,24 @@ public class GridManager : MonoBehaviour
                 _gameStatus = 0;
                 Rotate();
             }
+            
+            if (!isBoom && _gameStatus == 1 && _flow3>=0.8f)
+            {
+                blowHexes();
+            }
+            if (_flow3 >= 0.9f && !isBoom && panelActive)
+            {
+                _panel.GetComponentInChildren<Animator>().SetTrigger("panelDeactive");
+                panelActive = false;
+                Debug.Log(panelActive);
+                _score = 0;
+                _scoreText.text = _score.ToString();
+            }
+                
+
+
+
+
             if (Input.GetKeyDown(KeyCode.W))
             {
                 blowHexes();
@@ -83,11 +106,6 @@ public class GridManager : MonoBehaviour
             {
                 SceneManager.LoadScene(0);
             }
-            if (!isBoom && _gameStatus == 1 && _flow3>=0.45f)
-            {
-                blowHexes();
-            }
-                
         }
         
     }
@@ -124,8 +142,6 @@ public class GridManager : MonoBehaviour
                 xval += _xOffset;
                 index++;
                 hex_go.transform.SetParent(_tileMap);
-                
-                StartCoroutine(CoroutineWithMultipleParameters(hex_go, (index*delay),index));
             }
             yval += _yOffset*2;
         }
@@ -183,23 +199,9 @@ public class GridManager : MonoBehaviour
             }
             spriteYval += _spriteOffsetY;
         }
+        _gameStatus = 1;
     }
-    public IEnumerator CoroutineWithMultipleParameters(GameObject obj,float delay, int id) //start animation
-    {
-        Animator ann = obj.GetComponentInChildren<Animator>(); ;
-        yield return new WaitForSeconds(delay);
-        // Insert your Play Animations here
-        ann.SetTrigger("Gen");
-        if (id == 54)
-            _gameStatus = 1;
-    }
-    public IEnumerator CoroutineWithMultipleParameters2(GameObject obj, float delay) //drop animation
-    {
-        Animator ann = obj.GetComponentInChildren<Animator>(); ;
-        yield return new WaitForSeconds(delay);
-        // Insert your Play Animations here
-        ann.SetTrigger("Fall");
-    }
+
 
     void activateF1(GameObject midRight, GameObject topLeft, GameObject botLeft)
     {
@@ -422,9 +424,11 @@ public class GridManager : MonoBehaviour
                 if (player[1] != null && player[2] != null && player[3] != null)
                     if (player[1].transform.tag == player[2].transform.tag && player[1].transform.tag == player[3].transform.tag)  //hexlerin tagleri aynı ise
                     {
+                        GameObject expFX = Instantiate(_explodeFX, player[0].transform.position, Quaternion.identity);
+                        Destroy(expFX, 2f);
+                        _score += 30;
+                        _scoreText.text = _score.ToString();
                         isBoom = true;
-                        GameObject expFX = Instantiate(explodeFX, player[0].transform.position, Quaternion.identity);
-                        Destroy(expFX, 2.5f);
                         break;
                     }
             }
@@ -455,8 +459,7 @@ public class GridManager : MonoBehaviour
         for (int j = 0; j < 3; j++)
         {
             temp[j] = Camera.main.WorldToScreenPoint(player[j + 1].transform.position);
-            player[j + 1].SetActive(false);
-
+            //Destroy(player[j + 1]);
         }
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {
@@ -580,6 +583,7 @@ public class GridManager : MonoBehaviour
         }
         Debug.Log("time: " + time);
         yield return new WaitForSeconds(0.25f);
+        
         if (player[0].transform.parent.name == "SpriteF1")   //pattern kontrol
         {
             temp[0] = player[1].transform.position;  //ground of falling transfered
@@ -638,7 +642,7 @@ public class GridManager : MonoBehaviour
         isBoom = false;
         _gameStatus = 1;
         _flow3 =0;
-
+        
     }
 
     private void _playerReset()

@@ -43,7 +43,7 @@ public class Bomb : MonoBehaviour
                     _touchPosStart = _touch.position;
                 }
                 //TURN SELECTED OBJECTS
-                else if (Mathf.Abs(x) > Mathf.Abs(y) && flow >= 0.75f && GridManager.instance.player[0] != null)
+                else if (Mathf.Abs(x) > Mathf.Abs(y) && flow >= 0.75f && GridManager.instance.player[0] != null && GridManager.instance._gameStatus == 2)
                 {
                     //GetNeighboors and turn clockwise or counter-clockwise.
                     if (x > 0)

@@ -56,12 +56,21 @@ public class GridManager : MonoBehaviour
 
     public static bool isGameOver = false;
 
+    AudioSource audioSource;
+    public AudioClip audioClip;
+
+    public AudioSource audioSource2;
+    public AudioClip audioClip2;
+
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+        Screen.SetResolution(1080, 1920, true);
         player = new GameObject[4];
         _SpriteArray = new GameObject[108];
         instance = this;
         generateMap();
+        audioSource2.volume = 0f;
     }
 
     // Update is called once per frame
@@ -90,6 +99,7 @@ public class GridManager : MonoBehaviour
             {
                 _panel.GetComponentInChildren<Animator>().SetTrigger("panelDeactive");
                 panelActive = false;
+                audioSource2.volume = 1f;
                 _score = 0;
                 _scoreText.text = _score.ToString();
             }
@@ -126,11 +136,28 @@ public class GridManager : MonoBehaviour
                     {
                         _gameStatus = 0;
                         Rotate();
+                        audioSource.PlayOneShot(audioClip);
                     }
                     else
                     {
+                        /*_gameStatus = 0;
+                        Rotate();*/
+                    }
+                }
+
+                else if (Mathf.Abs(x) < Mathf.Abs(y) && _gameStatus == 2 && _flow2 >= 0.45f && player[0] != null)
+                {
+                    //GetNeighboors and turn clockwise or counter-clockwise.
+                    if (y > 0)
+                    {
                         _gameStatus = 0;
                         Rotate();
+                        audioSource.PlayOneShot(audioClip);
+                    }
+                    else
+                    {
+                        /*_gameStatus = 0;
+                        Rotate();*/
                     }
                 }
             }
@@ -466,6 +493,7 @@ public class GridManager : MonoBehaviour
                         }
                         _scoreText.text = _score.ToString();
                         isBoom = true;
+                        audioSource2.PlayOneShot(audioClip2);
                         break;
                     }
             }

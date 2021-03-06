@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40a54254438cb954d99e9363d76b7f99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveText: {fileID: 0}
 --- !u!1001 &2629680994178409481
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -154,7 +153,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: a282ef66e5132714e99c06a8ea0376e6,
+      objectReference: {fileID: 21300000, guid: 82041a9a861c8a241ab432e0b92ea164,
         type: 3}
     - target: {fileID: 3745154078714482015, guid: bbd4a93751dca72488d0f25fcf41ab97,
         type: 3}

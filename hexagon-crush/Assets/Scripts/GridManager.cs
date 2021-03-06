@@ -54,6 +54,8 @@ public class GridManager : MonoBehaviour
     private Touch _touch;
     private Vector2 _touchPosStart, _touchPosEnd;
 
+    public static bool isGameOver = false;
+
     void Start()
     {
         player = new GameObject[4];
@@ -72,7 +74,6 @@ public class GridManager : MonoBehaviour
                 deActivate(player[1], player[2], player[3]);
                 _playerReset();
             }
-            Debug.Log("Game over");
         }
         if(_gameStatus != 3 && _gameStatus != 9)
         {
@@ -154,7 +155,7 @@ public class GridManager : MonoBehaviour
             xval = 0;
             for (int x = 0; x < 7; x++)
             {
-                rand = Random.Range(0,5);
+                rand = Random.Range(0,6);
                 GameObject hex_go;
                 if (x % 2 == 0)
                 {
@@ -296,17 +297,20 @@ public class GridManager : MonoBehaviour
         for (int i = 0; i < a1.transform.childCount; i++)
         {
             child = a1.transform.GetChild(i).gameObject;
-            child.SetActive(false);
+            if(child.name != "Canvas")
+                child.SetActive(false);
         }
         for (int i = 0; i < a2.transform.childCount; i++)
         {
             child = a2.transform.GetChild(i).gameObject;
-            child.SetActive(false);
+            if (child.name != "Canvas")
+                child.SetActive(false);
         }
         for (int i = 0; i < a3.transform.childCount; i++)
         {
             child = a3.transform.GetChild(i).gameObject;
-            child.SetActive(false);
+            if (child.name != "Canvas")
+                child.SetActive(false);
         }
 
     }
@@ -520,38 +524,39 @@ public class GridManager : MonoBehaviour
             //new hex spawning
             if (fallingHexes.Count == 0)
                 if (bomb == 0)  //if de bomba-else de hex spawn.
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(7, 11)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
                 else
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 6)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
             else
                 if (bomb == 0)
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(7, 11)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
                 else
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 6)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
 
             if (fallingHexes2.Count == 0)
             {
                 if (bomb == 1)
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(7, 11)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 else
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[2].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], player[3].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], player[2].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
             }
             else
             {
                 if (bomb == 1)
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(7, 11)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 else
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
                 
             }
 
-            fallingHexes2OldLocations.Add(player[2].transform.position);
             fallingHexes2OldLocations.Add(player[3].transform.position);
+            fallingHexes2OldLocations.Add(player[2].transform.position);
+            fallingHexesOldLocations.Add(player[1].transform.position);
 
         }
-        else        //hex pattern 2 which means 2 hexes on left, 1 hex on right
+        else        //hex pattern 2 which means 2 hexes on right, 1 hex on left
         {
             for (int i = 0; i < 10; i++)
             {
@@ -572,14 +577,14 @@ public class GridManager : MonoBehaviour
 
             if (fallingHexes.Count == 0)
                 if(bomb == 0)
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(7, 11)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
                 else
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 6)], player[3].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
             else
                 if(bomb == 0)
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(7, 11)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
                 else
-                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes.Add(Instantiate(hexs[Random.Range(0, 6)], fallingHexes[fallingHexes.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
 
 
 
@@ -587,22 +592,23 @@ public class GridManager : MonoBehaviour
             if (fallingHexes2.Count == 0)
             {
                 if(bomb == 1)
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(7, 11)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 else
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], player[2].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], player[1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
             }
             else
             {
                 if(bomb == 1)
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(6, 10)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(7, 11)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
                 else
-                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
-                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 5)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
+                    fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 1.616f, 0), Quaternion.identity));
+                fallingHexes2.Add(Instantiate(hexs[Random.Range(0, 6)], fallingHexes2[fallingHexes2.Count - 1].transform.position + new Vector3(0, 0.808f, 0), Quaternion.identity));
             }
 
-            fallingHexes2OldLocations.Add(player[1].transform.position);
             fallingHexes2OldLocations.Add(player[2].transform.position);
+            fallingHexes2OldLocations.Add(player[1].transform.position);
+            fallingHexesOldLocations.Add(player[3].transform.position);
 
         }
 
@@ -648,7 +654,7 @@ public class GridManager : MonoBehaviour
             for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
             {
                 temp2 = fallingHexesOldLocations[i];
-                fallingHexes[i].transform.position = temp[0];
+                fallingHexes[i].transform.position = temp2;
                 fallingHexes[i].transform.SetParent(_tileMap);
                 temp[0] = temp2;
             }
@@ -660,7 +666,7 @@ public class GridManager : MonoBehaviour
                 for (int j = i; j < fallingHexes2.Count; j++) // right side hexes falled
                 {
                     temp2 = fallingHexes2OldLocations[j];
-                    fallingHexes2[j].transform.position = temp[1];
+                    fallingHexes2[j].transform.position = temp2;
                     fallingHexes2[j].transform.SetParent(_tileMap);
                     temp[1] = temp2;
                 }
@@ -674,7 +680,7 @@ public class GridManager : MonoBehaviour
             for (int i = 0; i < fallingHexes.Count; i++) // right side hexes falled
             {
                 temp2 = fallingHexesOldLocations[i];
-                fallingHexes[i].transform.position = temp[0];
+                fallingHexes[i].transform.position = temp2;
                 fallingHexes[i].transform.SetParent(_tileMap);
                 temp[0] = temp2;
             }
@@ -684,7 +690,7 @@ public class GridManager : MonoBehaviour
                 for (int j = i; j < fallingHexes2.Count; j++) // right side hexes falled
                 {
                     temp2 = fallingHexes2OldLocations[j];
-                    fallingHexes2[j].transform.position = temp[1];
+                    fallingHexes2[j].transform.position = temp2;
                     fallingHexes2[j].transform.SetParent(_tileMap);
                     temp[1] = temp2;
                 }

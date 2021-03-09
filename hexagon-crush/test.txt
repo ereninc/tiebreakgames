@@ -1,3 +1,7 @@
+<<<<<<< HEAD
 tt
 
 behlul
+=======
+tteren
+>>>>>>> eren
